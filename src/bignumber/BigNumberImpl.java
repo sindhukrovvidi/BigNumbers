@@ -13,16 +13,20 @@ public class BigNumberImpl implements BigNumber {
   private BigNumberImpl prev;
 
   public BigNumberImpl(String n) {
+    String tempStr = n.replaceFirst("^0+(?!$)", "");
     BigNumberImpl head = new BigNumberImpl();
     BigNumberImpl temp = head;
     BigNumberImpl prevTemp = new BigNumberImpl();
     int index = 0;
-    while (index < n.length()) {
-      temp.number = Integer.parseInt(String.valueOf(n.charAt(index)));
-      if (index < n.length() - 1) {
+    while (index < tempStr.length()) {
+      if (!Character.isDigit(tempStr.charAt(index))) {
+        throw new IllegalArgumentException("Invalid String, it should contain only numbers.");
+      }
+      temp.number = Integer.parseInt(String.valueOf(tempStr.charAt(index)));
+      if (index < tempStr.length() - 1) {
         temp.next = new BigNumberImpl();
         this.tail = temp.next;
-      } else if (n.length() == 1) {
+      } else if (tempStr.length() == 1) {
         this.tail = head;
       }
       prevTemp.next = temp;
@@ -34,7 +38,7 @@ public class BigNumberImpl implements BigNumber {
     head.prev = null;
     this.number = head.number;
     this.next = head.next;
-    this.length = n.length();
+    this.length = tempStr.length();
     this.prev = null;
   }
 
@@ -60,7 +64,10 @@ public class BigNumberImpl implements BigNumber {
 
   @Override
   public int length() {
-    return this.length;
+    if (this.next == null) {
+      return 1;
+    }
+    return 1 + this.next.length();
   }
 
   @Override
@@ -105,19 +112,26 @@ public class BigNumberImpl implements BigNumber {
       } else {
         long count = shifts;
         BigNumberImpl temp = this;
-        if (shifts < this.length / 2) {
-          while (count > 0) {
-            this.tail = this.tail.prev;
-            count--;
-          }
-          this.tail.next = null;
-        } else {
-          while ((length - count) > 1) {
-            temp = temp.next;
-            count++;
-          }
-          temp.next = null;
+        while (count > 0) {
+          // should update next also - breaking if 2 digits
+//          this.tail.next = null;
+          this.tail = this.tail.prev;
+          count--;
         }
+        this.tail.next = null;
+//        if (shifts < this.length / 2) {
+//          while (count > 0) {
+//            this.tail = this.tail.prev;
+//            count--;
+//          }
+//          this.tail.next = null;
+//        } else {
+//          while ((length - count) > 1) {
+//            temp = temp.next;
+//            count++;
+//          }
+//          temp.next = null;
+//        }
         this.length -= shifts;
       }
 
@@ -140,6 +154,9 @@ public class BigNumberImpl implements BigNumber {
 
   @Override
   public int getDigitAt(int index) {
+    if (index < 0) {
+      throw new IllegalArgumentException("The position must be non negative value.");
+    }
     if (index > this.length()) {
       return 0;
     } else {
@@ -156,47 +173,6 @@ public class BigNumberImpl implements BigNumber {
     return 0;
   }
 
-//  @Override
-//  public int getDigitAt(int index) {
-//    int currentLength = this.length();
-//    if (index > currentLength) {
-//      throw new IllegalArgumentException("The given index is not valid.");
-//    }
-//    int digit = 0;
-//    BigNumberImpl current = this;
-//    if(index < currentLength/2){
-//      int count = 1;
-//      while (current != null) {
-//        if (count == index) {
-//          return current.number;
-//        }
-//        count++;
-//        current = current.next;
-//      }
-//    } else {
-//      int count = 1;
-//      BigNumberImpl tailTemp = this.tail;
-//      while (tailTemp != null) {
-//        if (count == currentLength - index + 1) {
-//          return tailTemp.number;
-//        }
-//        count++;
-//        current = current.prev;
-//      }
-//    }
-//
-//
-//    int count = 1;
-//    while (current != null) {
-//      if (count == index) {
-//        return current.number;
-//      }
-//      count++;
-//      current = current.next;
-//    }
-//    return digit;
-//  }
-
   @Override
   public int compareTo(BigNumber newNumber) {
     if (this.length() > newNumber.length()) {
@@ -204,8 +180,59 @@ public class BigNumberImpl implements BigNumber {
     } else if (this.length() < newNumber.length()) {
       return -1;
     } else {
-      return 0;
+      if (this.equals(newNumber)) {
+        return 0;
+      } else {
+        int index = length - 1;
+        while (index >= 0) {
+          int digit1 = this.getDigitAt(index);
+          int digit2 = newNumber.getDigitAt(index);
+          if (digit1 < digit2) {
+            return -1;
+          } else if (digit1 > digit2) {
+            return 1;
+          }
+          index--;
+        }
+        return 0;
+      }
     }
+  }
+
+  // change the implementation of this. traverse the linked list instead of fetching the digit.
+  @Override
+  public boolean equals(Object newObject) {
+    if (this == newObject) {
+      return true;
+    }
+
+    if (!(newObject instanceof BigNumber)) {
+      return false;
+    }
+
+    BigNumber that = (BigNumber) newObject;
+
+    int index = length - 1;
+    while (index >= 0) {
+      int digit1 = this.getDigitAt(index);
+      int digit2 = ((BigNumber) newObject).getDigitAt(index);
+      if (!(digit1 == digit2)) {
+        return false;
+      }
+      index--;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hashcode = 0;
+    BigNumberImpl temp = this;
+    while (temp != null) {
+      hashcode += temp.number * (10) ^ 2;
+      temp = temp.next;
+    }
+    return hashcode;
   }
 
   @Override
