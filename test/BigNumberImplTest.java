@@ -170,22 +170,23 @@ public class BigNumberImplTest {
       }
 
     }
-    System.out.println(str.length());
-    System.out.println(num.length());
+//    System.out.println(str.length());
+//    System.out.println(num.length());
     assertEquals(str, num.toString());
     num.addDigit(9);
-    num.addDigit(9);
-    num.addDigit(8);
+//    num.addDigit(9);
+//    num.addDigit(8);
 
-    for (int i = 0; i < 1000; i++) {
-      num.shiftRight(i);
-//      for(int j=0; j<i; j++) {
-//        str = str + "0";
-//      }
-    }
-    assertEquals("126374996938587", num.toString());
-    num.shiftRight(10000);
-    assertEquals("0", num.toString());
+//    for (int i = 0; i < 1000; i++) {
+//      num.shiftRight(i);
+////      for(int j=0; j<i; j++) {
+////        str = str + "0";
+////      }
+//    }
+//    assertEquals("126374996938587", num.toString());
+//    num.shiftRight(10000);
+//    assertEquals("0", num.toString());
+//    num.addDigit(8);
   }
 
   @Test
@@ -239,10 +240,27 @@ public class BigNumberImplTest {
     A.shiftLeft(1);
     A.addDigit(6);
     assertEquals("66", A.toString());
-    A.shiftLeft(1);
-    assertEquals("660", A.toString());
     A.shiftRight(1);
     assertEquals("6", A.toString());
+//    BigNumber B = new BigNumberImpl("1234");
+//    BigNumber C = new BigNumberImpl("12345");
+//    assertEquals(true, A.hashCode() == B.hashCode());
+//    assertEquals(false, A.hashCode() == C.hashCode());
+  }
+
+  @Test
+  public void testShiftRightMorethanlength() {
+    BigNumber A = new BigNumberImpl("1");
+//    A.shiftLeft(1);
+//    A.addDigit(6);
+    assertEquals("1", A.toString());
+    A.shiftRight(10);
+//    A.addDigit(6);
+//    assertEquals("66", A.toString());
+//    A.shiftLeft(1);
+//    assertEquals("660", A.toString());
+//    A.shiftRight(1);
+    assertEquals("0", A.toString());
 //    BigNumber B = new BigNumberImpl("1234");
 //    BigNumber C = new BigNumberImpl("12345");
 //    assertEquals(true, A.hashCode() == B.hashCode());

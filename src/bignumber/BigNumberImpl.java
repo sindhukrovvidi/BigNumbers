@@ -1,5 +1,9 @@
 package bignumber;
 
+/**
+ * Implements the BigNumber Interface. Represents non-negative numbers of arbitrary lengths. The
+ * number is represented as list with each digit stored in a single node.
+ */
 public class BigNumberImpl implements BigNumber {
 
   private int number;
@@ -12,6 +16,10 @@ public class BigNumberImpl implements BigNumber {
 
   private BigNumberImpl prev;
 
+  /**
+   * constructor that takes a number as a string and represents it. It throws an
+   * IllegalArgumentException if the string passed to it does not represent a valid number.
+   */
   public BigNumberImpl(String n) {
     String tempStr = n.replaceFirst("^0+(?!$)", "");
     BigNumberImpl head = new BigNumberImpl();
@@ -42,6 +50,9 @@ public class BigNumberImpl implements BigNumber {
     this.prev = null;
   }
 
+  /**
+   * Constructor that initialises the big integer with 0.
+   */
   public BigNumberImpl() {
     this.number = 0;
     this.next = null;
@@ -73,7 +84,7 @@ public class BigNumberImpl implements BigNumber {
   @Override
   public void shiftLeft(long shifts) {
     if ((this.next == null && this.number == 0)) {
-
+      // do nothing
     } else if (shifts < 0) {
       this.shiftRight(Math.abs(shifts));
     } else {
@@ -97,11 +108,10 @@ public class BigNumberImpl implements BigNumber {
   @Override
   public void shiftRight(long shifts) {
     if ((this.next == null && this.number == 0)) {
-
+      // do nothing
     } else if (shifts < 0) {
       this.shiftLeft(Math.abs(shifts));
     } else {
-
       int currentLength = length;
       if (currentLength <= shifts) {
         number = 0;
@@ -113,26 +123,15 @@ public class BigNumberImpl implements BigNumber {
         long count = shifts;
         BigNumberImpl temp = this;
         while (count > 0) {
-          // should update next also - breaking if 2 digits
-//          this.tail.next = null;
           this.tail = this.tail.prev;
           count--;
+          this.length -= 1;
         }
         this.tail.next = null;
-//        if (shifts < this.length / 2) {
-//          while (count > 0) {
-//            this.tail = this.tail.prev;
-//            count--;
-//          }
-//          this.tail.next = null;
-//        } else {
-//          while ((length - count) > 1) {
-//            temp = temp.next;
-//            count++;
-//          }
-//          temp.next = null;
-//        }
-        this.length -= shifts;
+        if (this.length == 1) {
+          this.next = null;
+        }
+
       }
 
     }
@@ -144,12 +143,26 @@ public class BigNumberImpl implements BigNumber {
       throw new IllegalArgumentException("The digit should be a single non negative integer.");
     }
 
-    BigNumberImpl temp = addTwoNumbers(this, new BigNumberImpl(String.valueOf(digit)));
-    this.number = temp.number;
-    this.next = temp.next;
-    this.tail = temp.tail;
-    this.prev = temp.prev;
-    this.length = temp.length;
+    BigNumberImpl tail1 = this.tail;
+    BigNumberImpl temp = new BigNumberImpl(String.valueOf(digit));
+    BigNumberImpl newDigit = new BigNumberImpl();
+    int carry = 0;
+    while(carry!=0 || tail1 != null) {
+      int x = (tail1 != null) ? tail1.number : 0;
+      int sum = x + temp.number + carry;
+      carry = sum / 10;
+      newDigit.number = sum % 10;
+      if (tail1 != null) {
+        tail1 = tail1.prev;
+      }
+
+    }
+//    BigNumberImpl temp = addTwoNumbers(this, new BigNumberImpl(String.valueOf(digit)));
+//    this.number = temp.number;
+//    this.next = temp.next;
+//    this.tail = temp.tail;
+//    this.prev = temp.prev;
+//    this.length = temp.length;
   }
 
   @Override
@@ -199,7 +212,6 @@ public class BigNumberImpl implements BigNumber {
     }
   }
 
-  // change the implementation of this. traverse the linked list instead of fetching the digit.
   @Override
   public boolean equals(Object newObject) {
     if (this == newObject) {
@@ -210,13 +222,11 @@ public class BigNumberImpl implements BigNumber {
       return false;
     }
 
-    BigNumber that = (BigNumber) newObject;
-
     int index = length - 1;
     while (index >= 0) {
       int digit1 = this.getDigitAt(index);
       int digit2 = ((BigNumber) newObject).getDigitAt(index);
-      if (!(digit1 == digit2)) {
+      if (digit1 != digit2) {
         return false;
       }
       index--;
